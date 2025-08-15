@@ -1,0 +1,244 @@
+/* Mobile-First Responsive Styles */
+:root {
+  --mobile-padding: 15px;
+  --border-radius: 12px;
+  --transition-speed: 0.3s;
+}
+
+/* Base Mobile Styles */
+@media screen and (max-width: 767px) {
+  /* General Styles */
+  html {
+    font-size: 15px;
+    -webkit-text-size-adjust: 100%;
+    -moz-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+  }
+  
+  body {
+    overflow-x: hidden;
+  }
+  
+  /* Hero Section */
+  .hero {
+    padding: 30px var(--mobile-padding) 40px;
+    text-align: center;
+    flex-direction: column;
+    min-height: auto;
+    box-sizing: border-box;
+  }
+  
+  .hero-content {
+    width: 100%;
+    padding: 20px 0;
+  }
+  
+  .hero h1 {
+    font-size: 1.8rem;
+    line-height: 1.2;
+    margin: 0.5em 0 0.3em;
+    word-wrap: break-word;
+  }
+  
+  .hero h2 {
+    font-size: 1.1rem;
+    margin: 0 0 1.5em;
+    line-height: 1.5;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.9);
+  }
+  
+  .qr-code-container {
+    flex-direction: column;
+    gap: 25px;
+    align-items: center;
+    width: 100%;
+    padding: 0;
+  }
+  
+  .cta-buttons {
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    margin: 1.5em auto 0;
+    max-width: 100%;
+    width: 100%;
+    padding: 0 var(--mobile-padding);
+    box-sizing: border-box;
+  }
+  
+  .cta-buttons .btn {
+    width: 100%;
+    margin: 5px 0;
+  }
+  
+  /* Navigation */
+  .hamburger {
+    display: flex;
+    cursor: pointer;
+    z-index: 1000;
+  }
+  
+  .nav-links {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 70%;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.95);
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    transition: right 0.5s ease-in-out;
+    z-index: 999;
+    padding: 80px 20px 40px;
+  }
+  
+  .nav-links.active {
+    right: 0;
+  }
+  
+  .nav-links li {
+    margin: 15px 0;
+  }
+  
+  /* Sections */
+  section {
+    padding: 40px 15px;
+  }
+  
+  h3 {
+    font-size: 1.8rem;
+    margin-bottom: 20px;
+  }
+  
+  /* Feature Cards */
+  .feature-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+  }
+  
+  /* Timeline */
+  .timeline {
+    flex-direction: column;
+    align-items: center;
+    padding: 0 var(--mobile-padding);
+    width: 100%;
+    max-width: 100%;
+  }
+  
+  .timeline-item {
+    width: 100%;
+    margin-bottom: 30px;
+    position: relative;
+    padding-left: 30px;
+  }
+  
+  .timeline-item::before {
+    display: none;
+  }
+  
+  .timeline-icon {
+    position: absolute;
+    left: -15px;
+    top: 0;
+  }
+  
+  /* Contact Form */
+  .contact-form {
+    padding: 20px;
+  }
+  
+  /* Footer */
+  footer {
+    padding: 30px 15px;
+  }
+  
+  .social-links {
+    justify-content: center;
+    margin-top: 20px;
+  }
+  
+  /* Modal */
+  .modal-content {
+    width: 90%;
+    padding: 20px;
+  }
+  
+  /* QR Code Section */
+  .qr-section {
+    padding: 40px 15px;
+  }
+  
+  .qr-section h2 {
+    font-size: 1.8rem;
+  }
+  
+  .qr-container {
+    padding: 20px;
+  }
+  
+  .qr-code {
+    width: 180px;
+    height: 180px;
+    margin: 0 auto;
+  }
+  
+  /* Creator Section */
+  .creator-info {
+    flex-direction: column;
+    text-align: center;
+    align-items: center;
+    gap: 20px;
+    width: 100%;
+  }
+  
+  .creator-details {
+    margin-top: 20px;
+  }
+}
+
+/* Tablet Styles */
+@media screen and (min-width: 768px) and (max-width: 1023px) {
+  .hero {
+    padding: 40px 30px;
+  }
+  
+  .feature-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .timeline {
+    flex-wrap: wrap;
+    justify-content: space-around;
+  }
+  
+  .timeline-item {
+    width: 45%;
+    margin-bottom: 30px;
+  }
+  
+  .timeline-content {
+    padding: 20px 15px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    text-align: left;
+  }
+}
+
+/* Desktop Styles */
+@media screen and (min-width: 1024px) {
+  .hamburger {
+    display: none;
+  }
+  
+  .nav-links {
+    display: flex;
+  }
+}

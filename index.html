@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, minimum-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0f172a" />
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>BioSentinel 360</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="mobile.css" media="screen and (max-width: 1024px)" />
+  <style>
+    /* Mobile-specific overrides */
+    @media (max-width: 767px) {
+      .hero {
+        padding: 30px 15px 40px;
+      }
+      
+      .hero h1 {
+        font-size: 2rem;
+        line-height: 1.2;
+        margin: 0.5em 0 0.3em;
+      }
+      
+      .hero h2 {
+        font-size: 1.1rem;
+        margin: 0 0 1.5em;
+        line-height: 1.5;
+      }
+      
+      .cta-buttons {
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+        margin: 1.5em auto 0;
+        max-width: 100%;
+        width: 100%;
+        padding: 0 15px;
+        box-sizing: border-box;
+      }
+      
+      .cta-buttons .btn {
+        width: 100%;
+        max-width: 280px;
+        margin: 0;
+        padding: 12px 20px;
+        font-size: 0.95rem;
+      }
+      
+      section {
+        padding: 40px 15px;
+      }
+      
+      .feature-card {
+        width: 100%;
+        margin: 0 0 20px;
+      }
+      
+      .qr-code-container {
+        flex-direction: column;
+        gap: 20px;
+      }
+      
+      .qr-code {
+        width: 180px;
+        height: 180px;
+      }
+    }
+  </style>
+  <link rel="stylesheet" href="css/scanning-reports.css" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="Logo.png">
+  <meta name="apple-mobile-web-app-title" content="BioSentinel 360">
+  <script src="https://kit.fontawesome.com/4b8b0b7e2e.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <!-- Add this button where you want the scanning reports button to appear -->
+  <div class="cta-buttons" style="margin-top: 20px;">
+    <button id="viewScanningReports" class="btn" style="background: linear-gradient(90deg, #4f46e5, #06b6d4);">
+      <i class="fas fa-chart-line"></i> View Scanning Reports
+    </button>
+  </div>
+
+  <!-- Add this modal for scanning reports -->
+  <div id="scanningReportsModal" class="modal">
+    <div class="modal-content" style="max-width: 95%; max-height: 90vh; overflow-y: auto;">
+      <span class="close" id="closeScanningReports">&times;</span>
+      <div class="scanning-reports-section">
+        <div class="scanning-reports-header">
+          <h2>Scanning Reports</h2>
+          <p>View detailed metrics and trends from your health scans</p>
+        </div>
+        <div id="scanningReportsContainer" class="scan-reports-container">
+          <!-- Charts will be inserted here by JavaScript -->
+        </div>
+        <div class="download-all-container">
+          <button id="downloadAllReports" class="btn primary">
+            <i class="fas fa-file-pdf"></i> Download All Reports as PDF
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Add touch detection for mobile hover states
+    document.documentElement.classList.add('js');
+    if (('ontouchstart' in window) || window.DocumentTouch && document instanceof DocumentTouch) {
+      document.documentElement.classList.add('touch');
+    } else {
+      document.documentElement.classList.add('no-touch');
+    }
+  </script>
+  <style>
+    /* Mobile Menu Toggle */
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      justify-content: space-between;
+      width: 30px;
+      height: 21px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      z-index: 1000;
+    }
+    
+    .hamburger .line {
+      width: 100%;
+      height: 3px;
+      background-color: #fff;
+      border-radius: 3px;
+      transition: all 0.3s ease;
+    }
+    
+    .hamburger.active .line:nth-child(1) {
+      transform: translateY(9px) rotate(45deg);
+    }
+    
+    .hamburger.active .line:nth-child(2) {
+      opacity: 0;
+    }
+    
+    .hamburger.active .line:nth-child(3) {
+      transform: translateY(-9px) rotate(-45deg);
+    }
+    </style>
+    <style> 
+    /* QR Code Section Styles */
+    .qr-section .qr-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 2rem;
+      align-items: flex-start;
+      margin-top: 2rem;
+    }
+    
+    .qr-section .qr-code-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex: 1;
+      min-width: 250px;
+      max-width: 300px;
+    }
+    
+    .qr-section .scan-reports-cta {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 16px;
+      padding: 2rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      flex: 1;
+      min-width: 300px;
+      max-width: 400px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    
+    .qr-section .scan-reports-cta h3 {
+      color: #2c3e50;
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+      font-weight: 700;
+    }
+    
+    .qr-section .scan-reports-cta p {
+      color: #6c757d;
+      margin-bottom: 1.5rem;
+      line-height: 1.6;
+    }
+    
+    .qr-section .btn-reports {
+      background: linear-gradient(90deg, #4f46e5, #06b6d4);
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      text-decoration: none;
+      margin: 0 auto;
+      width: 100%;
+      max-width: 250px;
+    }
+    
+    .qr-section .btn-reports:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(79, 70, 229, 0.3);
+    }
+    
+    @media (max-width: 768px) {
+      .qr-section .qr-container {
+        flex-direction: column;
+        align-items: center;
+        gap: 2rem;
+      }
+      
+      .qr-section .qr-code-wrapper,
+      .qr-section .scan-reports-cta {
+        width: 100%;
+        max-width: 100%;
+      }
+      
+      .qr-section .btn-reports {
+        max-width: 100%;
+      }
+    }
+    
+    .qr-section {
+      padding: 80px 20px;
+      background: linear-gradient(135deg, #1e1e1e 0%, #131313 100%);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .qr-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 8px;
+      background: linear-gradient(90deg, #2ecc71, #3498db, #9b59b6);
+    }
+    
+    .qr-section h2 {
+      color: #2c3e50;
+      margin-bottom: 15px;
+      font-size: 2.5em;
+      font-weight: 700;
+      position: relative;
+      display: inline-block;
+      padding-bottom: 10px;
+    }
+    
+    .qr-section h2::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 4px;
+      background: #2ecc71;
+      border-radius: 2px;
+    }
+    
+    .qr-section p.subtitle {
+      color: #6c757d;
+      font-size: 1.2em;
+      max-width: 700px;
+      margin: 0 auto 40px;
+      line-height: 1.6;
+    }
+    
+    .qr-container {
+      max-width: 340px;
+      margin: 0 auto;
+      padding: 30px;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+    
+    .qr-container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 8px;
+      background: linear-gradient(90deg, #2ecc71, #3498db);
+    }
+    
+    .qr-container:hover {
+      transform: translateY(-8px) scale(1.02);
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
+    }
+    
+    #qrcode {
+      display: inline-block;
+      padding: 20px;
+      background: white;
+      border-radius: 12px;
+      margin: 15px 0;
+      border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+    
+    .qr-actions {
+      margin-top: 25px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    
+    .qr-actions .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 24px;
+      border-radius: 50px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      border: none;
+      cursor: pointer;
+      font-size: 0.95em;
+    }
+    
+    .qr-actions .btn i {
+      font-size: 1.1em;
+    }
+    
+    .qr-actions .btn-download {
+      background: #2c3e50;
+      color: white;
+    }
+    
+    .qr-actions .btn-download:hover {
+      background: #1a252f;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(44, 62, 80, 0.2);
+    }
+    
+    .qr-actions .btn-share {
+      background: #f8f9fa;
+      color: #2c3e50;
+      border: 1px solid #dee2e6;
+    }
+    
+    .qr-actions .btn-share:hover {
+      background: #e9ecef;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    }
+    
+    @media (max-width: 768px) {
+      .qr-section {
+        padding: 60px 15px;
+      }
+      
+      .qr-section h2 {
+        font-size: 2em;
+      }
+      
+      .qr-container {
+        padding: 25px 20px;
+        max-width: 100%;
+      }
+      
+      .qr-actions {
+        flex-direction: column;
+      }
+      
+      .qr-actions .btn {
+        width: 100%;
+      }
+    }
+  </style>
+  <style>
+    /* Scan Symbol Styles */
+    .nav-links .scan-symbol {
+      margin-left: 15px;
+      display: flex;
+      align-items: center;
+    }
+    
+    .nav-links .scan-symbol a {
+      color: #000000;
+      font-size: 1.4em;
+      padding: 8px 12px;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .nav-links .scan-symbol a:hover {
+      background: rgba(255, 255, 255, 0.15);
+      transform: translateY(-2px);
+    }
+    
+    .nav-links .scan-symbol .tooltip {
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%) translateY(10px);
+      background: #2c3e50;
+      color: rgb(0, 0, 0);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.8em;
+      white-space: nowrap;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+      pointer-events: none;
+      z-index: 100;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    
+    .nav-links .scan-symbol a:hover .tooltip {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-50%) translateY(5px);
+    }
+    
+    @media (max-width: 768px) {
+      .nav-links .scan-symbol {
+        margin: 15px 0 0;
+        justify-content: center;
+      }
+      
+      .nav-links .scan-symbol .tooltip {
+        display: none;
+      }
+    }
+    
+    .modal-content {
+      background: linear-gradient(135deg, #181e2a 80%, #232b3a 100%);
+      animation: modalBgAnim 8s linear infinite alternate;
+    }
+    @keyframes modalBgAnim {
+      0% { filter: brightness(1) hue-rotate(0deg); }
+      100% { filter: brightness(1.08) hue-rotate(10deg); }
+    }
+    .video-container video {
+      width: 100%;
+      max-width: 800px;
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(67, 206, 162, 0.3);
+    }
+  </style>
+  <script src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+</head>
+<body>
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-bg-pattern"></div>
+    <div class="hero-content">
+      <h1>BioSentinel 360</h1>
+      <h2>AI-Powered Health Monitoring Robot</h2>
+      <p>Bringing smart healthcare to every home — in real time.</p>
+      <div class="cta-buttons">
+        <a href="#" class="btn primary">Download App</a>
+        <a href="#" class="btn secondary" id="watchDemoBtn">Watch Demo</a>
+        <a href="app.html" class="btn view-app-btn" id="viewAppBtn" role="button" aria-label="Open BioSentinel 360 Dashboard">
+          <i class="fas fa-external-link-alt" aria-hidden="true"></i>
+          <span>Open Dashboard</span>
+        </a>
+        <a href="qrcode.html" class="btn" id="qrScannerBtn" style="background-color: #2ecc71;">
+          <i class="fas fa-qrcode" aria-hidden="true"></i>
+          <span>Scan QR Code</span>
+        </a>
+      </div>
+    </div>
+    <div class="hero-bg">
+      <div class="hero-images" style="display: flex; justify-content: center; align-items: center; padding: 20px;">
+        <img src="Logo.png" alt="BioSentinel 360 Logo" class="logo-img" style="max-width: 200px; height: auto; object-fit: contain;" />
+      </div>
+    </div>
+  </section>
+
+  
+
+  <!-- Video Modal -->
+  <div id="demoModal" class="modal">
+    <div class="modal-content">
+      <span class="close" id="closeDemoModal">&times;</span>
+      <h2>Watch Demo</h2>
+      <div class="video-container">
+        <video id="demoVideo" controls>
+          <source src="demo video.mp4" type="video/mp4">
+          Your browser does not support the video tag.
+        </video>
+      </div>
+      <div>
+        <p>Watch how BioSentinel 360 monitors health vitals and provides real-time assistance</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- What Is BioSentinel 360? -->
+  <section class="about" id="about">
+    <h3>What Is BioSentinel 360?</h3>
+    <p>BioSentinel 360 is an intelligent mobile robot designed to monitor vital signs like heart rate, temperature, SpO₂, and ECG in real time.</p>
+    <ul>
+      <li><i class="fas fa-heartbeat"></i> Monitors vitals & detects falls</li>
+      <li><i class="fas fa-video"></i> Connects to doctors remotely via video call</li>
+      <li><i class="fas fa-microphone"></i> Uses voice and gesture control</li>
+      <li><i class="fas fa-tools"></i> Open-source and buildable at home</li>
+    </ul>
+  </section>
+
+  <!-- Features -->
+  <section class="features" id="features">
+    <h3>Features</h3>
+    <div class="feature-cards">
+      <div class="card"><i class="fas fa-heartbeat"></i><span>Real-Time Health Monitoring</span></div>
+      <div class="card"><i class="fas fa-project-diagram"></i><span>Holographic Display of Vitals</span></div>
+      <div class="card"><i class="fas fa-microphone"></i><span>Voice/Gesture Interaction</span></div>
+      <div class="card"><i class="fas fa-cloud"></i><span>Cloud Sync & Emergency Alerts</span></div>
+      <div class="card"><i class="fas fa-mobile-alt"></i><span>Mobile App + Bluetooth Pairing</span></div>
+    </div>
+  </section>
+
+  <!-- Future Vision -->
+  <section class="future" id="future">
+    <nav class="navbar">
+      <div class="logo">
+        <a href="#home">BioSentinel 360</a>
+      </div>
+      <button class="hamburger" aria-label="Menu" aria-expanded="false">
+        <span class="line"></span>
+        <span class="line"></span>
+        <span class="line"></span>
+      </button>
+      <ul class="nav-links">
+        <li><a href="#home" class="nav-link">Home</a></li>
+        <li><a href="#features" class="nav-link">Features</a></li>
+        <li><a href="#about" class="nav-link">About</a></li>
+        <li><a href="#contact" class="nav-link">Contact</a></li>
+        <li class="scan-symbol">
+          <a href="qr-scanner.html" title="Scan QR Code" class="nav-link">
+            <i class="fas fa-qrcode"></i>
+            <span class="tooltip">Scan QR Code</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+    <h3>Future Vision</h3>
+    <div class="timeline">
+      <div class="timeline-item">
+        <div class="timeline-icon"><i class="fas fa-brain"></i></div>
+        <div class="timeline-content">AI for Disease Prediction</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-icon"><i class="fas fa-link"></i></div>
+        <div class="timeline-content">Blockchain for Health Records</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-icon"><i class="fas fa-wifi"></i></div>
+        <div class="timeline-content">Integration with Wearables & Drones</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-icon"><i class="fas fa-language"></i></div>
+        <div class="timeline-content">Multilingual Rural Interface</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- About the Creator -->
+  <section class="creator" id="creator">
+    <h3>About the Creator</h3>
+    <div class="creator-info">
+      <div class="creator-details">
+        <p><strong>Vivek Pochiraju</strong></p>
+        <p>Student, Final Year B.Tech CSE</p>
+        <p>Swarnandhra College of Engineering & Technology, Narsapur, Andhra Pradesh</p>
+        <p>Email: <a href="mailto:vivekpochiraju@gmail.com">vivekpochiraju@gmail.com</a></p>
+        <p>Location: Hyderabad, India</p>
+      </div>
+    </div>
+  </section>
+  
+
+  <!-- Contact / Footer -->
+  <footer id="contact">
+    <div class="contact-form">
+      <h3>Contact</h3>
+      <form>
+        <input type="text" name="name" placeholder="Name" required />
+        <input type="email" name="email" placeholder="Email" required />
+        <textarea name="message" placeholder="Message" required></textarea>
+        <button type="submit">Send</button>
+      </form>
+      <div class="social-links">
+        <a href="https://github.com/vivekpochiraju" target="_blank"><i class="fab fa-github"></i></a>
+        <a href="https://linkedin.com/in/vivekpochiraju" target="_blank"><i class="fab fa-linkedin"></i></a>
+        <img src="https://api.qrserver.com/v1/create-qr-code/?data=https://github.com/vivekpochiraju/BioSentinel360&size=80x80" alt="QR Code" class="qr-code" />
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>Copyright &copy; 2025 BioSentinel 360</p>
+    </div>
+  </footer>
+<!-- QR Code Section -->
+<section class="qr-section" id="qr-code">
+  <div class="container">
+    <h2>Scan to Visit Us</h2>
+    <p class="subtitle">Use your smartphone camera to scan this QR code and quickly access our website on any device</p>
+    
+    <div class="qr-container">
+      <div class="qr-code-wrapper">
+        <div id="qrcode"></div>
+        <div class="qr-actions">
+          <button id="downloadQr" class="btn btn-download">
+            <i class="fas fa-download"></i> Download QR Code
+          </button>
+          <button id="shareQr" class="btn btn-share">
+            <i class="fas fa-share-alt"></i> Share
+          </button>
+        </div>
+      </div>
+      <div class="scan-reports-cta">
+        <h3>Health Reports</h3>
+        <p>View detailed health metrics and track your progress over time</p>
+        <button id="viewScanningReports" class="btn btn-reports">
+          <i class="fas fa-chart-line"></i> View Scan Reports
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+  <script src="js/scanning-reports.js"></script>
+  <script>
+    // Mobile menu toggle
+    document.addEventListener('DOMContentLoaded', function() {
+      const hamburger = document.querySelector('.hamburger');
+      const navLinks = document.querySelector('.nav-links');
+      const navLinksItems = document.querySelectorAll('.nav-link');
+      
+      if (hamburger && navLinks) {
+        hamburger.addEventListener('click', function() {
+          this.classList.toggle('active');
+          navLinks.classList.toggle('active');
+          document.body.classList.toggle('no-scroll');
+          this.setAttribute('aria-expanded', this.getAttribute('aria-expanded') === 'true' ? 'false' : 'true');
+        });
+        
+        // Close menu when clicking on a nav link
+        navLinksItems.forEach(link => {
+          link.addEventListener('click', function() {
+            if (hamburger.classList.contains('active')) {
+              hamburger.classList.remove('active');
+              navLinks.classList.remove('active');
+              document.body.classList.remove('no-scroll');
+              hamburger.setAttribute('aria-expanded', 'false');
+            }
+          });
+        });
+      }
+      
+      // Close menu when clicking outside
+      document.addEventListener('click', function(event) {
+        const isClickInsideNav = navLinks.contains(event.target) || hamburger.contains(event.target);
+        if (!isClickInsideNav && navLinks.classList.contains('active')) {
+          hamburger.classList.remove('active');
+          navLinks.classList.remove('active');
+          document.body.classList.remove('no-scroll');
+          hamburger.setAttribute('aria-expanded', 'false');
+        }
+      });
+    });
+
+    // Scanning Reports Modal
+    const scanningReportsModal = document.getElementById('scanningReportsModal');
+    const viewScanningReportsBtn = document.getElementById('viewScanningReports');
+    const closeScanningReportsBtn = document.getElementById('closeScanningReports');
+
+    if (viewScanningReportsBtn && scanningReportsModal && closeScanningReportsBtn) {
+      viewScanningReportsBtn.addEventListener('click', () => {
+        scanningReportsModal.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+      });
+
+      closeScanningReportsBtn.addEventListener('click', () => {
+        scanningReportsModal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+      });
+
+      window.addEventListener('click', (e) => {
+        if (e.target === scanningReportsModal) {
+          scanningReportsModal.style.display = 'none';
+          document.body.style.overflow = 'auto';
+        }
+      });
+    }
+
+    // Modal functionality
+    const watchDemoBtn = document.getElementById('watchDemoBtn');
+    const demoModal = document.getElementById('demoModal');
+    const closeDemoModal = document.getElementById('closeDemoModal');
+    const demoVideo = document.getElementById('demoVideo');
+    
+    if (watchDemoBtn && demoModal) {
+      watchDemoBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        demoModal.style.display = 'block';
+        if (demoVideo) demoVideo.play();
+      });
+
+      if (closeDemoModal) {
+        closeDemoModal.addEventListener('click', function() {
+          demoModal.style.display = 'none';
+          if (demoVideo) {
+            demoVideo.pause();
+            demoVideo.currentTime = 0;
+          }
+        });
+      }
+      
+      // Close modal when clicking outside
+      window.addEventListener('click', function(event) {
+        if (event.target === demoModal) {
+          demoModal.style.display = 'none';
+          if (demoVideo) {
+            demoVideo.pause();
+            demoVideo.currentTime = 0;
+          }
+        }
+      });
+    }
+
+    // Dynamic vital signs simulation
+    function updateVitalSigns() {
+      const heartRateEl = document.getElementById('heartRateValue');
+      const tempEl = document.getElementById('tempValue');
+      const spo2El = document.getElementById('spo2Value');
+      const bpEl = document.getElementById('bpValue');
+      
+      if (heartRateEl && tempEl && spo2El && bpEl) {
+        setInterval(() => {
+          // Heart rate: 70-75 BPM with small variations
+          const heartRate = 70 + Math.floor(Math.random() * 6);
+          heartRateEl.textContent = heartRate;
+          
+          // Temperature: 98.4-98.8°F with small variations
+          const temp = (98.4 + Math.random() * 0.4).toFixed(1);
+          tempEl.textContent = temp;
+          
+          // SpO2: 97-99% with small variations
+          const spo2 = 97 + Math.floor(Math.random() * 3);
+          spo2El.textContent = spo2;
+          
+          // Blood pressure: small variations around 120/80
+          const systolic = 118 + Math.floor(Math.random() * 5);
+          const diastolic = 78 + Math.floor(Math.random() * 5);
+          bpEl.textContent = `${systolic}/${diastolic}`;
+        }, 2000);
+      }
+    }
+
+    // Initialize when DOM is loaded
+    document.addEventListener('DOMContentLoaded', function() {
+      // Generate QR Code
+      const currentUrl = window.location.href.split('?')[0];
+      
+      // Generate QR Code
+      new QRCode(document.getElementById("qrcode"), {
+        text: currentUrl,
+        width: 200,
+        height: 200,
+        colorDark: "#2c3e50",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.H
+      });
+      
+      // Download QR Code
+      document.getElementById('downloadQr').addEventListener('click', function() {
+        const canvas = document.querySelector('#qrcode canvas');
+        const link = document.createElement('a');
+        link.download = 'biosentinel360-qrcode.png';
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+      });
+      
+      // Share QR Code
+      document.getElementById('shareQr').addEventListener('click', async function() {
+        try {
+          const canvas = document.querySelector('#qrcode canvas');
+          const dataUrl = canvas.toDataURL('image/png');
+          const blob = await (await fetch(dataUrl)).blob();
+          const file = new File([blob], 'biosentinel360-qrcode.png', { type: 'image/png' });
+          
+          if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+            await navigator.share({
+              title: 'BioSentinel 360',
+              text: 'Scan this QR code to visit our website',
+              files: [file],
+              url: currentUrl
+            });
+          } else {
+            // Fallback for browsers that don't support sharing files
+            const link = document.createElement('a');
+            link.href = dataUrl;
+            link.download = 'biosentinel360-qrcode.png';
+            link.click();
+          }
+        } catch (err) {
+          console.error('Error sharing:', err);
+          // Fallback to download if sharing fails
+          const canvas = document.querySelector('#qrcode canvas');
+          const link = document.createElement('a');
+          link.download = 'biosentinel360-qrcode.png';
+          link.href = canvas.toDataURL('image/png');
+          link.click();
+        }
+      });
+    });
+  </script>
+</body>
+</html>

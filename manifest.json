@@ -1,0 +1,50 @@
+{
+  "name": "BioSentinel 360",
+  "short_name": "BioSentinel",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "description": "AI-Powered Health Monitoring Robot",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "Logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "Logo-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "screenshot1.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "BioSentinel 360 Dashboard"
+    }
+  ],
+  "categories": ["health", "medical", "productivity"],
+  "shortcuts": [
+    {
+      "name": "Open Dashboard",
+      "short_name": "Dashboard",
+      "description": "Open the main dashboard",
+      "url": "/app.html",
+      "icons": [{ "src": "/icons/dashboard-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Scan QR Code",
+      "short_name": "Scan",
+      "description": "Scan a QR code",
+      "url": "/qrcode.html",
+      "icons": [{ "src": "/icons/qr-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

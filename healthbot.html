@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BioHealth Assistant</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f5f7fa;
+        }
+        
+        .healthbot-container {
+            max-width: 400px;
+            margin: 20px auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .healthbot-header {
+            background: linear-gradient(135deg, #2ecc71, #3498db);
+            color: white;
+            padding: 15px 20px;
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        .healthbot-messages {
+            height: 500px;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        
+        .message {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: flex-start;
+        }
+        
+        .message.user {
+            justify-content: flex-end;
+        }
+        
+        .message-content {
+            max-width: 70%;
+            padding: 10px 15px;
+            border-radius: 18px;
+            line-height: 1.4;
+        }
+        
+        .bot .message-content {
+            background: #f1f5f9;
+            border-top-left-radius: 4px;
+        }
+        
+        .user .message-content {
+            background: #3498db;
+            color: white;
+            border-top-right-radius: 4px;
+        }
+        
+        .healthbot-input-container {
+            display: flex;
+            padding: 15px;
+            border-top: 1px solid #eee;
+            background: white;
+        }
+        
+        #healthbot-input {
+            flex: 1;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            outline: none;
+        }
+        
+        .healthbot-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-left: 10px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="healthbot-container">
+        <div class="healthbot-header">
+            BioHealth Assistant
+        </div>
+        <div class="healthbot-messages" id="healthbot-messages">
+            <div class="message bot">
+                <div class="message-content">
+                    Hello! I'm your BioHealth Assistant. How can I help you today?
+                </div>
+            </div>
+        </div>
+        <div class="healthbot-input-container">
+            <input type="text" id="healthbot-input" placeholder="Type your health question...">
+            <button class="healthbot-btn" id="healthbot-voice">
+                <i class="fas fa-microphone"></i>
+            </button>
+            <button class="healthbot-btn" id="healthbot-send">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Basic chat functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const messagesContainer = document.getElementById('healthbot-messages');
+            const input = document.getElementById('healthbot-input');
+            const sendBtn = document.getElementById('healthbot-send');
+            const voiceBtn = document.getElementById('healthbot-voice');
+            
+            // Add message to chat
+            function addMessage(content, isUser = false) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${isUser ? 'user' : 'bot'}`;
+                messageDiv.innerHTML = `
+                    <div class="message-content">
+                        ${content}
+                    </div>
+                `;
+                messagesContainer.appendChild(messageDiv);
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
+            
+            // Handle send button click
+            sendBtn.addEventListener('click', sendMessage);
+            
+            // Handle Enter key
+            input.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+            
+            // Send message function
+            function sendMessage() {
+                const message = input.value.trim();
+                if (message) {
+                    addMessage(message, true);
+                    input.value = '';
+                    
+                    // Simulate bot response (will be replaced with AI logic)
+                    setTimeout(() => {
+                        const responses = [
+                            "I'm here to help with health-related questions. Could you provide more details?",
+                            "For medical emergencies, please contact your healthcare provider immediately.",
+                            "I can provide general health information, but I'm not a substitute for professional medical advice."
+                        ];
+                        const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+                        addMessage(randomResponse);
+                    }, 1000);
+                }
+            }
+            
+            // Voice recognition (basic implementation)
+            let recognition = null;
+            if ('webkitSpeechRecognition' in window) {
+                recognition = new webkitSpeechRecognition();
+                recognition.continuous = false;
+                recognition.interimResults = false;
+                
+                recognition.onresult = function(event) {
+                    const transcript = event.results[0][0].transcript;
+                    input.value = transcript;
+                    sendMessage();
+                };
+                
+                voiceBtn.addEventListener('click', function() {
+                    recognition.start();
+                    voiceBtn.innerHTML = '<i class="fas fa-microphone-slash"></i>';
+                    
+                    recognition.onspeechend = function() {
+                        recognition.stop();
+                        voiceBtn.innerHTML = '<i class="fas fa-microphone"></i>';
+                    };
+                });
+            } else {
+                voiceBtn.style.display = 'none';
+                console.log('Speech recognition not supported in this browser');
+            }
+        });
+    </script>
+</body>
+</html>
