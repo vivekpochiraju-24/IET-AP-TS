@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BioSentinel 360 - Health Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/@heroicons/v2/outline/index.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+  <style>
+    :root {
+      --primary: #0d9488;
+      --primary-light: #2dd4bf;
+      --primary-dark: #0f766e;
+      --secondary: #f8fafc;
+      --secondary-dark: #e2e8f0;
+      --accent: #0d9488;
+      --accent-green: #059669;
+      --accent-yellow: #d97706;
+      --accent-red: #dc2626;
+      --text-primary: #0f172a;
+      --text-secondary: #334155;
+      --border-color: #cbd5e1;
+      --bg-gradient: linear-gradient(135deg, #f0fdfa 0%, #e0f2fe 100%);
+      --card-gradient: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+      --text-gradient: linear-gradient(90deg, #0d9488, #0891b2);
+    }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      background: #f8fafc;
+      color: var(--text-primary);
+      min-height: 100vh;
+      margin: 0;
+      padding: 0;
+      line-height: 1.5;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+      background: white;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+      min-height: 100vh;
+    }
+    
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding: 1rem 0;
+      border-bottom: 2px solid var(--border-color);
+    }
+    
+    .header-title {
+      font-size: 1.75rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      background: var(--text-gradient);
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin: 0;
+    }
+    
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      padding: 0.4rem 1rem;
+      border-radius: 9999px;
+      background: rgba(13, 148, 136, 0.1);
+      color: var(--primary-dark);
+      border: 1px solid rgba(13, 148, 136, 0.2);
+    }
+    
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent-green);
+      animation: pulse 2s infinite;
+    }
+    
+    .last-updated {
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+    }
+    
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.25rem;
+    }
+    
+    .activity-card {
+      background: var(--card-gradient);
+      border-radius: 8px;
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+      transition: all 0.3s ease;
+      border: 1px solid var(--border-color);
+      border-left: 4px solid var(--primary);
+      position: relative;
+      overflow: hidden;
+      animation: fadeInUp 0.5s ease-out forwards;
+      opacity: 0;
+      transform: translateY(10px);
+      box-shadow: 0 2px 8px rgba(13, 148, 136, 0.08);
+    }
+    
+    .activity-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: 4px;
+      background: linear-gradient(to bottom, var(--primary), var(--primary-light));
+      transition: all 0.3s ease;
+    }
+    
+    .activity-card:hover::before {
+      width: 6px;
+    }
+    
+    .activity-card:nth-child(1) { animation-delay: 0.05s; border-left-color: #3b82f6; }
+    .activity-card:nth-child(2) { animation-delay: 0.1s; border-left-color: #10b981; }
+    .activity-card:nth-child(3) { animation-delay: 0.15s; border-left-color: #f59e0b; }
+    .activity-card:nth-child(4) { animation-delay: 0.2s; border-left-color: #8b5cf6; }
+    .activity-card:nth-child(5) { animation-delay: 0.25s; border-left-color: #ec4899; }
+    
+    .activity-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 20px -3px rgba(13, 148, 136, 0.15);
+      border-color: var(--primary);
+    }
+    
+    .metric-card {
+      background: var(--card-gradient);
+      border-radius: 12px;
+      padding: 1.5rem;
+      border-left: 4px solid var(--primary);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(13, 148, 136, 0.08);
+      border: 1px solid var(--border-color);
+      height: 100%;
+    }
+    
+    .metric-card.oxygen { border-left-color: #3b82f6; }
+    .metric-card.blood-pressure { border-left-color: #8b5cf6; }
+    .metric-card.temperature { border-left-color: #f59e0b; }
+    .metric-card.steps { border-left-color: #10b981; }
+    .metric-card.sleep { border-left-color: #8b5cf6; }
+    .metric-card.calories { border-left-color: #ec4899; }
+    
+    .metric-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1rem;
+    }
+    
+    .metric-title {
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+      font-weight: 600;
+      margin: 0 0 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .metric-value {
+      font-size: 2rem;
+      font-weight: 700;
+      background: var(--text-gradient);
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin: 0.5rem 0;
+      line-height: 1.2;
+      display: flex;
+      align-items: baseline;
+      gap: 0.25rem;
+    }
+    
+    .metric-unit {
+      color: var(--text-secondary);
+      font-size: 1rem;
+      font-weight: 500;
+      margin-left: 0.25rem;
+    }
+    
+    .metric-trend {
+      display: inline-flex;
+      align-items: center;
+      font-size: 0.75rem;
+      font-weight: 500;
+      padding: 0.25rem 0.5rem;
+      border-radius: 6px;
+      margin-top: 0.5rem;
+      background: rgba(255, 255, 255, 0.05);
+    }
+    
+    .trend-icon {
+      margin-right: 0.25rem;
+      width: 0.9rem;
+      height: 0.9rem;
+    }
+    
+    .normal-range {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      margin-top: 0.5rem;
+      padding-top: 0.5rem;
+      border-top: 1px dashed var(--border-color);
+    }
+    
+    .activity-status.completed {
+      background: #ecfdf5;
+      color: #059669;
+      border-color: #a7f3d0;
+    }
+    
+    .activity-status.pending {
+      background: #fffbeb;
+      color: #d97706;
+      border-color: #fcd34d;
+    }
+    
+    .btn-outline {
+      background: white;
+      border: 1px solid var(--primary);
+      color: var(--primary);
+      transition: all 0.2s ease;
+    }
+    
+    .btn-outline:hover {
+      background: rgba(13, 148, 136, 0.05);
+      border-color: var(--primary-dark);
+      color: var(--primary-dark);
+    }
+    
+    .btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.6rem 1.25rem;
+      border-radius: 8px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 4px rgba(13, 148, 136, 0.2);
+      text-decoration: none;
+    }
+    
+    .btn:hover {
+      background: #0f766e;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 6px rgba(13, 148, 136, 0.25);
+    }
+    
+    .progress-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.6s ease;
+      background: linear-gradient(90deg, var(--primary), var(--primary-light));
+    }
+    
+    .metric-change.positive {
+      color: #059669;
+    }
+    
+    .metric-change {
+      display: flex;
+      align-items: center;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      margin-top: 0.5rem;
+    }
+    
+    .progress-bar {
+      height: 8px;
+      background: #f1f5f9;
+      border-radius: 4px;
+      overflow: hidden;
+      margin: 0.75rem 0;
+      box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+    }
+    
+    .activity-time {
+      font-size: 0.75rem;
+      color: var(--primary-dark);
+      margin-top: 0.25rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+    
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.5; }
+      100% { opacity: 1; }
+    }
+    
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    @keyframes pulseScale {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.02); }
+      100% { transform: scale(1); }
+    }
+    
+    @media (max-width: 768px) {
+      .container {
+        padding: 1rem;
+      }
+      
+      .header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+      }
+      
+      .metrics-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body class="bg-gray-900">
+  <div class="container">
+    <header class="header">
+      <div>
+        <h1 class="header-title">
+          Health Dashboard
+          <span class="status-badge">
+            <span class="status-dot"></span>
+            Connected
+          </span>
+        </h1>
+        <p class="last-updated">Last updated: Just now</p>
+      </div>
+      <a href="index.html" class="text-blue-400 hover:text-blue-300 text-sm font-medium flex items-center">
+        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Back to Home
+      </a>
+    </header>
+    
+    <div class="metrics-grid">
+      <!-- Heart Rate Card -->
+      <div class="metric-card heart-rate">
+        <div class="metric-header">
+          <span class="metric-title">Heart Rate</span>
+          <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: rgba(239, 68, 68, 0.1);">
+            <svg class="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+            </svg>
+          </div>
+        </div>
+        <div class="metric-value">72<span class="metric-unit">bpm</span></div>
+        <div class="metric-trend">
+          <svg class="trend-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" />
+          </svg>
+          5% from yesterday
+        </div>
+        <div class="normal-range">Normal range: 60-100 bpm</div>
+      </div>
+      
+      <!-- Oxygen Level Card -->
+      <div class="metric-card oxygen">
+        <div class="metric-header">
+          <span class="metric-title">Oxygen Level</span>
+          <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: rgba(59, 130, 246, 0.1);">
+            <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+        </div>
+        <div class="metric-value">98<span class="metric-unit">%</span></div>
+        <div class="metric-trend">
+          <svg class="trend-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+          </svg>
+          2% from yesterday
+        </div>
+        <div class="normal-range">Normal range: 95-100%</div>
+      </div>
+      
+      <!-- Blood Pressure Card -->
+      <div class="metric-card blood-pressure">
+        <div class="metric-header">
+          <span class="metric-title">Blood Pressure</span>
+          <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: rgba(139, 92, 246, 0.1);">
+            <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+            </svg>
+          </div>
+        </div>
+        <div class="metric-value">120/80<span class="metric-unit">mmHg</span></div>
+        <div class="metric-trend">Stable</div>
+        <div class="normal-range">Normal range: 90/60 - 120/80 mmHg</div>
+      </div>
+      
+      <!-- Temperature Card -->
+      <div class="metric-card temperature">
+        <div class="metric-header">
+          <span class="metric-title">Body Temperature</span>
+          <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: rgba(245, 158, 11, 0.1);">
+            <svg class="w-5 h-5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+        </div>
+        <div class="metric-value">98.6<span class="metric-unit">°F</span></div>
+        <div class="metric-trend">
+          <svg class="trend-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+          </svg>
+          0.5°F from yesterday
+        </div>
+        <div class="normal-range">Normal range: 97.5-99.5°F</div>
+      </div>
+    </div>
+    
+    <!-- New Metrics Row -->
+    <div class="metrics-grid mt-6">
+      <!-- Steps Card -->
+      <div class="metric-card steps">
+        <div class="metric-header">
+          <span class="metric-title">Daily Steps</span>
+          <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: rgba(16, 185, 129, 0.1);">
+            <svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+          </div>
+        </div>
+        <div class="metric-value">8,542<span class="metric-unit">steps</span></div>
+        <div class="metric-trend">
+          <svg class="trend-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+          </svg>
+          1,234 steps to go
+        </div>
+        <div class="normal-range">Goal: 10,000 steps</div>
+      </div>
+      
+      <!-- Sleep Card -->
+      <div class="metric-card sleep">
+        <div class="metric-header">
+          <span class="metric-title">Sleep</span>
+          <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: rgba(139, 92, 246, 0.1);">
+            <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 0112 2.944a9.003 9.003 0 01-8.354 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016zM12 9v2m0 4h.01" />
+            </svg>
+          </div>
+        </div>
+        <div class="metric-value">7.5<span class="metric-unit">hrs</span></div>
+        <div class="metric-trend">
+          <svg class="trend-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" />
+          </svg>
+          30min less than yesterday
+        </div>
+        <div class="normal-range">Recommended: 7-9 hours</div>
+      </div>
+      
+      <!-- Calories Card -->
+      <div class="metric-card calories">
+        <div class="metric-header">
+          <span class="metric-title">Calories</span>
+          <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: rgba(236, 72, 153, 0.1);">
+            <svg class="w-5 h-5 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+          </div>
+        </div>
+        <div class="metric-value">1,850<span class="metric-unit">kcal</span></div>
+        <div class="metric-trend">
+          <svg class="trend-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" />
+          </svg>
+          85% of daily goal
+        </div>
+        <div class="normal-range">Goal: 2,200 kcal</div>
+      </div>
+      
+      <!-- Water Intake Card -->
+      <div class="metric-card water">
+        <div class="metric-header">
+          <span class="metric-title">Water Intake</span>
+          <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: rgba(59, 130, 246, 0.1);">
+            <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.618 5.984A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016zM12 9v2m0 4h.01" />
+            </svg>
+          </div>
+        </div>
+        <div class="metric-value">5.2<span class="metric-unit">cups</span></div>
+        <div class="metric-trend">
+          <svg class="trend-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+          </svg>
+          2.8 cups to go
+        </div>
+        <div class="normal-range">Goal: 8 cups (2L)</div>
+      </div>
+    </div>
+    
+    <!-- Daily Activities Section -->
+    <div class="mt-8">
+      <h2 class="text-xl font-bold text-white mb-4">Daily Activities</h2>
+      
+      <div class="space-y-3">
+        <!-- Activity 1 -->
+        <div class="activity-card">
+          <div class="flex justify-between items-center mb-1">
+            <h3 class="text-base font-semibold text-white">Morning Walk</h3>
+            <span class="text-xs text-gray-400">7:30 AM</span>
+          </div>
+          <div class="w-full bg-gray-700 rounded-full h-1.5 mb-1 overflow-hidden">
+            <div class="bg-green-500 h-full rounded-full transition-all duration-1000 ease-out" style="width: 85%"></div>
+          </div>
+          <div class="flex justify-between text-xs text-gray-400">
+            <span>2.5 km</span>
+            <span>3.2k steps</span>
+            <span>180 kcal</span>
+            <span class="text-green-400">85%</span>
+          </div>
+        </div>
+        
+        <!-- Activity 2 -->
+        <div class="activity-card">
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center justify-between">
+              <h3 class="text-sm font-semibold text-gray-800 truncate">Breakfast</h3>
+              <span class="text-xs text-gray-500 ml-2 whitespace-nowrap">8:30 AM</span>
+            </div>
+            <p class="text-xs text-gray-600 mt-1">Oatmeal, fruits, nuts</p>
+          </div>
+          <div class="flex items-center text-green-500 text-xs ml-3 whitespace-nowrap">
+            <span class="text-gray-600 text-xs mr-2">450 kcal</span>
+          </div>
+        </div>
+    
+    <!-- Calendar Section -->
+    <div class="mt-8">
+      <h2 class="text-xl font-bold text-white mb-4">Health Calendar</h2>
+      <div id="calendar" class="bg-secondary-dark rounded-xl p-4"></div>
+    </div>
+    
+    <script>
+      // Initialize FullCalendar
+      document.addEventListener('DOMContentLoaded', function() {
+        var calendarEl = document.getElementById('calendar');
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+          initialView: 'dayGridMonth',
+          headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,timeGridDay'
+          },
+          events: [
+            {
+              title: 'Morning Checkup',
+              start: '2025-08-15T08:00:00',
+              end: '2025-08-15T08:30:00',
+              backgroundColor: '#3b82f6',
+              borderColor: '#3b82f6'
+            },
+            {
+              title: 'Medication Reminder',
+              start: '2025-08-15T13:00:00',
+              backgroundColor: '#10b981',
+              borderColor: '#10b981'
+            },
+            {
+              title: 'Evening Walk',
+              start: '2025-08-15T18:00:00',
+              end: '2025-08-15T19:00:00',
+              backgroundColor: '#8b5cf6',
+              borderColor: '#8b5cf6'
+            },
+            {
+              title: 'Doctor Appointment',
+              start: '2025-08-17T10:00:00',
+              end: '2025-08-17T11:00:00',
+              backgroundColor: '#ef4444',
+              borderColor: '#ef4444'
+            },
+            {
+              title: 'Medication Refill',
+              start: '2025-08-20',
+              allDay: true,
+              backgroundColor: '#f59e0b',
+              borderColor: '#f59e0b'
+            }
+          ]
+        });
+        calendar.render();
+      });
+    </script>
+  </div>
+</body>
+</html>

@@ -3,15 +3,154 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, minimum-scale=1.0, viewport-fit=cover" />
-  <meta name="theme-color" content="#0f172a" />
+  <meta name="theme-color" content="#ffffff" />
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <title>BioSentinel 360</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css" />
   <link rel="stylesheet" href="mobile.css" media="screen and (max-width: 1024px)" />
   <style>
+    :root {
+      --primary: #0d9488;
+      --primary-light: #2dd4bf;
+      --primary-dark: #0f766e;
+      --secondary: #f8fafc;
+      --secondary-dark: #e2e8f0;
+      --accent: #0d9488;
+      --accent-green: #059669;
+      --accent-yellow: #d97706;
+      --accent-red: #dc2626;
+      --text-primary: #0f172a;
+      --text-secondary: #334155;
+      --border-color: #cbd5e1;
+      --bg-color: #f8fafc;
+      --card-bg: #ffffff;
+      --text-gradient: #0d9488;
+    }
+    
+    body {
+      font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      background: var(--bg-color);
+      color: var(--text-primary);
+      margin: 0;
+      padding: 0;
+      line-height: 1.6;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+      color: var(--text-primary);
+      margin-top: 0;
+      line-height: 1.2;
+      color: var(--text-gradient);
+    }
+    
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      margin: 0 8px;
+      text-align: center;
+      border: none;
+      cursor: pointer;
+      gap: 8px;
+      background: var(--primary);
+      color: white;
+    }
+    
+    .btn.primary {
+      background: var(--primary);
+      color: white;
+      box-shadow: 0 2px 4px rgba(13, 148, 136, 0.2);
+    }
+    
+    .btn.primary:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(13, 148, 136, 0.3);
+    }
+    
+    .card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 24px;
+      text-align: center;
+      transition: all 0.3s ease;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 4px 12px rgba(13, 148, 136, 0.08);
+    }
+    
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 16px rgba(13, 148, 136, 0.1);
+    }
+    
+    .modal-content {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+    
+    .nav-links a {
+      color: var(--text-primary);
+      text-decoration: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      transition: all 0.3s ease;
+      font-weight: 500;
+    }
+    
+    .nav-links a:hover {
+      color: var(--primary);
+      background: var(--secondary);
+    }
+    
+    .logo a {
+      color: var(--primary);
+      font-size: 1.5rem;
+      font-weight: 800;
+      text-decoration: none;
+      color: var(--text-gradient);
+    }
+    
+    .timeline-item {
+      position: relative;
+      padding: 20px;
+      margin: 10px 0;
+      background: var(--card-bg);
+      border-radius: 8px;
+      border-left: 4px solid var(--primary);
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+    
+    .timeline-item:hover {
+      transform: translateX(5px);
+      box-shadow: 0 4px 12px rgba(13, 148, 136, 0.15);
+    }
+    
+    .timeline-icon {
+      position: absolute;
+      left: -15px;
+      top: 25px;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      box-shadow: 0 4px 8px rgba(13, 148, 136, 0.3);
+    }
+
     /* Mobile-specific overrides */
     @media (max-width: 767px) {
       .hero {
@@ -47,6 +186,8 @@
         margin: 0;
         padding: 12px 20px;
         font-size: 0.95rem;
+        background: var(--primary);
+        color: white;
       }
       
       section {
@@ -79,7 +220,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <!-- Add this button where you want the scanning reports button to appear -->
   <div class="cta-buttons" style="margin-top: 20px;">
-    <button id="viewScanningReports" class="btn" style="background: linear-gradient(90deg, #4f46e5, #06b6d4);">
+    <button id="viewScanningReports" class="btn" style="background: var(--primary);">
       <i class="fas fa-chart-line"></i> View Scanning Reports
     </button>
   </div>
@@ -115,41 +256,6 @@
     }
   </script>
   <style>
-    /* Mobile Menu Toggle */
-    .hamburger {
-      display: none;
-      flex-direction: column;
-      justify-content: space-between;
-      width: 30px;
-      height: 21px;
-      background: transparent;
-      border: none;
-      cursor: pointer;
-      padding: 0;
-      z-index: 1000;
-    }
-    
-    .hamburger .line {
-      width: 100%;
-      height: 3px;
-      background-color: #fff;
-      border-radius: 3px;
-      transition: all 0.3s ease;
-    }
-    
-    .hamburger.active .line:nth-child(1) {
-      transform: translateY(9px) rotate(45deg);
-    }
-    
-    .hamburger.active .line:nth-child(2) {
-      opacity: 0;
-    }
-    
-    .hamburger.active .line:nth-child(3) {
-      transform: translateY(-9px) rotate(-45deg);
-    }
-    </style>
-    <style> 
     /* QR Code Section Styles */
     .qr-section .qr-container {
       display: flex;
@@ -170,7 +276,7 @@
     }
     
     .qr-section .scan-reports-cta {
-      background: rgba(255, 255, 255, 0.95);
+      background: var(--secondary);
       border-radius: 16px;
       padding: 2rem;
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
@@ -197,7 +303,7 @@
     }
     
     .qr-section .btn-reports {
-      background: linear-gradient(90deg, #4f46e5, #06b6d4);
+      background: var(--primary);
       color: white;
       border: none;
       padding: 0.8rem 1.5rem;
@@ -217,7 +323,8 @@
     
     .qr-section .btn-reports:hover {
       transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(79, 70, 229, 0.3);
+      box-shadow: 0 5px 15px rgba(13, 148, 136, 0.3);
+      background: var(--primary-dark);
     }
     
     @media (max-width: 768px) {
@@ -240,30 +347,22 @@
     
     .qr-section {
       padding: 80px 20px;
-      background: linear-gradient(135deg, #1e1e1e 0%, #131313 100%);
+      background: var(--bg-color);
       text-align: center;
       position: relative;
       overflow: hidden;
-    }
-    
-    .qr-section::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 8px;
-      background: linear-gradient(90deg, #2ecc71, #3498db, #9b59b6);
+      color: #2c3e50;
     }
     
     .qr-section h2 {
-      color: #2c3e50;
+      color: var(--text-primary);
       margin-bottom: 15px;
       font-size: 2.5em;
       font-weight: 700;
       position: relative;
       display: inline-block;
       padding-bottom: 10px;
+      color: var(--text-gradient);
     }
     
     .qr-section h2::after {
@@ -279,7 +378,7 @@
     }
     
     .qr-section p.subtitle {
-      color: #6c757d;
+      color: var(--text-secondary);
       font-size: 1.2em;
       max-width: 700px;
       margin: 0 auto 40px;
@@ -290,23 +389,13 @@
       max-width: 340px;
       margin: 0 auto;
       padding: 30px;
-      background: white;
+      background: var(--card-bg);
       border-radius: 16px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+      box-shadow: 0 10px 30px rgba(13, 148, 136, 0.1);
       transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
       position: relative;
       overflow: hidden;
-      border: 1px solid rgba(0, 0, 0, 0.05);
-    }
-    
-    .qr-container::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 8px;
-      background: linear-gradient(90deg, #2ecc71, #3498db);
+      border: 1px solid var(--border-color);
     }
     
     .qr-container:hover {
@@ -343,6 +432,8 @@
       border: none;
       cursor: pointer;
       font-size: 0.95em;
+      background: var(--primary);
+      color: white;
     }
     
     .qr-actions .btn i {
@@ -350,24 +441,24 @@
     }
     
     .qr-actions .btn-download {
-      background: #2c3e50;
+      background: var(--primary);
       color: white;
     }
     
     .qr-actions .btn-download:hover {
-      background: #1a252f;
+      background: var(--primary-dark);
       transform: translateY(-2px);
       box-shadow: 0 5px 15px rgba(44, 62, 80, 0.2);
     }
     
     .qr-actions .btn-share {
-      background: #f8f9fa;
-      color: #2c3e50;
-      border: 1px solid #dee2e6;
+      background: var(--secondary);
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
     }
     
     .qr-actions .btn-share:hover {
-      background: #e9ecef;
+      background: var(--secondary-dark);
       transform: translateY(-2px);
       box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
     }
@@ -404,7 +495,7 @@
     }
     
     .nav-links .scan-symbol a {
-      color: #000000;
+      color: var(--primary);
       font-size: 1.4em;
       padding: 8px 12px;
       border-radius: 8px;
@@ -416,8 +507,9 @@
     }
     
     .nav-links .scan-symbol a:hover {
-      background: rgba(255, 255, 255, 0.15);
+      background: rgba(13, 148, 136, 0.1);
       transform: translateY(-2px);
+      color: var(--primary-dark);
     }
     
     .nav-links .scan-symbol .tooltip {
@@ -425,8 +517,8 @@
       top: 100%;
       left: 50%;
       transform: translateX(-50%) translateY(10px);
-      background: #2c3e50;
-      color: rgb(0, 0, 0);
+      background: var(--primary);
+      color: white;
       padding: 6px 12px;
       border-radius: 6px;
       font-size: 0.8em;
@@ -436,7 +528,7 @@
       transition: all 0.3s ease;
       pointer-events: none;
       z-index: 100;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      box-shadow: 0 4px 12px rgba(13, 148, 136, 0.2);
     }
     
     .nav-links .scan-symbol a:hover .tooltip {
@@ -457,8 +549,10 @@
     }
     
     .modal-content {
-      background: linear-gradient(135deg, #181e2a 80%, #232b3a 100%);
-      animation: modalBgAnim 8s linear infinite alternate;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
     }
     @keyframes modalBgAnim {
       0% { filter: brightness(1) hue-rotate(0deg); }
@@ -480,11 +574,11 @@
     <div class="hero-content">
       <h1>BioSentinel 360</h1>
       <h2>AI-Powered Health Monitoring Robot</h2>
-      <p>Bringing smart healthcare to every home — in real time.</p>
+      <p class="gradient-text">Bringing smart healthcare to every home — in real time.</p>
       <div class="cta-buttons">
         <a href="#" class="btn primary">Download App</a>
         <a href="#" class="btn secondary" id="watchDemoBtn">Watch Demo</a>
-        <a href="app.html" class="btn view-app-btn" id="viewAppBtn" role="button" aria-label="Open BioSentinel 360 Dashboard">
+        <a href="health-dashboard.html" class="btn view-app-btn" id="viewAppBtn" role="button" aria-label="Open BioSentinel 360 Dashboard">
           <i class="fas fa-external-link-alt" aria-hidden="true"></i>
           <span>Open Dashboard</span>
         </a>
@@ -523,7 +617,7 @@
   <!-- What Is BioSentinel 360? -->
   <section class="about" id="about">
     <h3>What Is BioSentinel 360?</h3>
-    <p>BioSentinel 360 is an intelligent mobile robot designed to monitor vital signs like heart rate, temperature, SpO₂, and ECG in real time.</p>
+    <p class="gradient-text-subtle">BioSentinel 360 is an intelligent mobile robot designed to monitor vital signs like heart rate, temperature, SpO₂, and ECG in real time.</p>
     <ul>
       <li><i class="fas fa-heartbeat"></i> Monitors vitals & detects falls</li>
       <li><i class="fas fa-video"></i> Connects to doctors remotely via video call</li>
@@ -547,26 +641,6 @@
   <!-- Future Vision -->
   <section class="future" id="future">
     <nav class="navbar">
-      <div class="logo">
-        <a href="#home">BioSentinel 360</a>
-      </div>
-      <button class="hamburger" aria-label="Menu" aria-expanded="false">
-        <span class="line"></span>
-        <span class="line"></span>
-        <span class="line"></span>
-      </button>
-      <ul class="nav-links">
-        <li><a href="#home" class="nav-link">Home</a></li>
-        <li><a href="#features" class="nav-link">Features</a></li>
-        <li><a href="#about" class="nav-link">About</a></li>
-        <li><a href="#contact" class="nav-link">Contact</a></li>
-        <li class="scan-symbol">
-          <a href="qr-scanner.html" title="Scan QR Code" class="nav-link">
-            <i class="fas fa-qrcode"></i>
-            <span class="tooltip">Scan QR Code</span>
-          </a>
-        </li>
-      </ul>
     </nav>
     <h3>Future Vision</h3>
     <div class="timeline">
@@ -617,7 +691,6 @@
       <div class="social-links">
         <a href="https://github.com/vivekpochiraju" target="_blank"><i class="fab fa-github"></i></a>
         <a href="https://linkedin.com/in/vivekpochiraju" target="_blank"><i class="fab fa-linkedin"></i></a>
-        <img src="https://api.qrserver.com/v1/create-qr-code/?data=https://github.com/vivekpochiraju/BioSentinel360&size=80x80" alt="QR Code" class="qr-code" />
       </div>
     </div>
     <div class="footer-bottom">
@@ -642,15 +715,6 @@
           </button>
         </div>
       </div>
-      <div class="scan-reports-cta">
-        <h3>Health Reports</h3>
-        <p>View detailed health metrics and track your progress over time</p>
-        <button id="viewScanningReports" class="btn btn-reports">
-          <i class="fas fa-chart-line"></i> View Scan Reports
-        </button>
-      </div>
-    </div>
-  </div>
 </section>
   <script src="js/scanning-reports.js"></script>
   <script>
